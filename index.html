@@ -1,0 +1,51 @@
+<!DOCTYPE html><html><head><link rel="icon" type="icon/png" href="test.png"><script>
+var window = window;
+var canvas = window.document.createElement ('canvas');
+var game = {
+	canvas: {
+		load: function () {
+			canvas.resize = function () {
+				this.height = game.window.height;
+				this.width = game.window.width;
+			};
+		}
+	},
+
+	load: function () {
+		this.window.load ();
+		this.canvas.load ();
+	},
+
+	resize: function () {
+		window.resize ();
+		canvas.resize ();
+	},
+
+	window: {
+		height: undefined,
+
+		load: function () {
+			window.onload = function () {
+				game.resize ();
+				window.document.body.appendChild (canvas);
+			};
+
+			window.onresize = function () {
+				game.resize ();
+			};
+
+			window.resize = function () {
+				game.window.height = this.innerHeight;
+				game.window.width = this.innerWidth;
+			};
+		},
+
+		width: undefined
+	}
+};
+
+game.load ();
+</script><style>
+	body { margin: 0; }
+	canvas { position: absolute; }
+</style></head></html>
