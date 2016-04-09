@@ -1,43 +1,136 @@
 <!DOCTYPE html><html><head><link rel="icon" type="icon/png" href="test.png"><script>
 var window = window;
+var console = window.console;
 var canvas = window.document.createElement ('canvas');
-var game = {
-	canvas: {
-		load: function () {
-			canvas.resize = function () {
+var context = canvas.getContext ('2d');
+var game =
+{
+	canvas:
+	{
+		load: function ()
+		{
+			canvas.resize = function ()
+			{
 				this.height = game.window.height;
 				this.width = game.window.width;
 			};
 		}
 	},
 
-	load: function () {
-		this.window.load ();
-		this.canvas.load ();
+	create:
+	{
+		sprite: function (sprite)
+		{
+			this.name = 'sprite';
+			this.id = 0;
+
+			this.image = sprite.image || new Image ();
+
+			this.h = sprite.h || image.naturalHeight;
+			this.w = sprite.w || image.naturalWidth;
+			this.x = sprite.x || 0;
+			this.y = sprite.y || 0;
+			this.z = sprite.z || 0;
+
+			this.draw = function ()
+			{
+				game.draw.image ({ height: this.h, image: game.image.test, width: this.w, x: this.x, y: this.y });
+			};
+
+			game.scene[this.z][this.name][this.id] = this;
+		}
 	},
 
-	resize: function () {
+	draw:
+	{
+		image: function (image)
+		{
+			console.time ('click');
+			var h = image.height || this.naturalHeight;
+			var i = image.image;
+			var w = image.width || this.naturalWidth;
+			var x, y;
+			context.clearRect (0, 0, game.window.width, game.window.height);
+			for (var n = 1000; n--;)
+			{
+				x = game.window.width * Math.random ();
+				y = game.window.height * Math.random ();
+				context.drawImage (i, x, y, w, h);
+			};
+			console.timeEnd ('click');
+		}
+	},
+
+	image:
+	{
+		load: function ()
+		{
+			for (var id in game.image)
+			{
+				if (id != 'load')
+				{
+					var image = new Image ();
+						image.src = game.image [id];
+					game.image[id] = image;
+				};
+			};
+		},
+		test: 'test.png'
+	},
+
+	load: function ()
+	{
+		game.window.load ();
+		game.canvas.load ();
+		game.image.load ();
+	},
+
+	resize: function ()
+	{
 		window.resize ();
 		canvas.resize ();
 	},
 
-	window: {
+	scene: {},
+
+	update:
+	{
+		click: function (event)
+		{
+			var tile = 10;
+			game.draw.image ({ height: tile, image: game.image.test, width: tile, x: event.x, y: event.y });
+		}
+	},
+
+	window:
+	{
 		height: undefined,
 
-		load: function () {
-			window.onload = function () {
-				game.resize ();
-				window.document.body.appendChild (canvas);
+		load: function ()
+		{
+			window.onclick = function (event)
+			{
+				game.update.click (event);
 			};
 
-			window.onresize = function () {
+			window.onload = function ()
+			{
+				game.resize ();
+				this.document.body.appendChild (canvas);
+			};
+
+			window.onresize = function ()
+			{
 				game.resize ();
 			};
 
-			window.resize = function () {
+			window.resize = function ()
+			{
 				game.window.height = this.innerHeight;
 				game.window.width = this.innerWidth;
 			};
+
+			window.document.title = '0.' + JSON.stringify (game).length;
 		},
 
 		width: undefined
