@@ -1,6 +1,7 @@
 <!DOCTYPE html><html><head><link rel="icon" type="icon/png" href="test.png"><script>
 var window = window;
 var console = window.console;
+var log = function (log) { window.console.log (log); };
 var canvas = window.document.createElement ('canvas');
 var context = canvas.getContext ('2d');
 var game =
@@ -21,23 +22,23 @@ var game =
 	{
 		sprite: function (sprite)
 		{
-			this.name = 'sprite';
-			this.id = 0;
+			sprite.type = 'sprite';
+			sprite.id = game.id++;
 
-			this.image = sprite.image || new Image ();
+			sprite.image = sprite.image || new Image ();
 
-			this.h = sprite.h || image.naturalHeight;
-			this.w = sprite.w || image.naturalWidth;
-			this.x = sprite.x || 0;
-			this.y = sprite.y || 0;
-			this.z = sprite.z || 0;
+			sprite.h = sprite.h || sprite.image.naturalHeight;
+			sprite.w = sprite.w || sprite.image.naturalWidth;
+			sprite.x = game.x (sprite.x);
+			sprite.y = game.x (sprite.y);
+			sprite.z = game.z (sprite.z);
 
-			this.draw = function ()
+			sprite.draw = function ()
 			{
-				game.draw.image ({ height: this.h, image: game.image.test, width: this.w, x: this.x, y: this.y });
+				game.draw.image ({ height: sprite.h, image: game.image.test, width: sprite.w, x: sprite.x, y: sprite.y });
 			};
 
-			game.scene[this.z][this.name][this.id] = this;
+			game.scene[sprite.z].push (sprite);
 		}
 	},
 
@@ -50,7 +51,6 @@ var game =
 			var i = image.image;
 			var w = image.width || this.naturalWidth;
 			var x, y;
-			context.clearRect (0, 0, game.window.width, game.window.height);
 			for (var n = 1000; n--;)
 			{
 				x = game.window.width * Math.random ();
@@ -58,8 +58,28 @@ var game =
 				context.drawImage (i, x, y, w, h);
 			};
 			console.timeEnd ('click');
+		},
+
+		scene: false,
+
+		update: function ()
+		{
+			if (game.draw.scene)
+			{
+				context.clearRect (0, 0, game.window.width, game.window.height);
+				for (var z = 0; z < Object.keys (game.scene).length; z++)
+				{
+					for (var id = game.scene[z].length; id-- ;)
+					{
+						game.scene[z][id].draw ();
+					};
+				};
+				game.draw.scene = false;
+			};
 		}
 	},
+
+	id: 0,
 
 	image:
 	{
@@ -80,9 +100,10 @@ var game =
 
 	load: function ()
 	{
-		game.window.load ();
-		game.canvas.load ();
 		game.image.load ();
+		game.canvas.load ();
+		game.window.load ();
+		game.timer.load ();
 	},
 
 	resize: function ()
@@ -91,14 +112,39 @@ var game =
 		canvas.resize ();
 	},
 
-	scene: {},
+	scene: { 0: [] },
+
+	tick: 50,
+	time: 0,
+	timer:
+	{
+		clock: {},
+		load: function ()
+		{
+			game.timer.clock = window.setInterval
+			(
+				function ()
+				{
+					game.update.tick ();
+					game.time += game.tick;
+				},
+				game.tick
+			);
+		}
+	},
 
 	update:
 	{
 		click: function (event)
 		{
 			var tile = 10;
-			game.draw.image ({ height: tile, image: game.image.test, width: tile, x: event.x, y: event.y });
+			game.create.sprite ({ height: tile, image: game.image.test, width: tile, x: 0.5, y: 0.5 });
+			game.draw.scene = true;
+		},
+
+		tick: function ()
+		{
+			game.draw.update ();
 		}
 	},
 
@@ -134,7 +180,11 @@ var game =
 		},
 
 		width: undefined
-	}
+	},
+
+	x: function (x) { x = x || 0; x = (x > 1) ? x / game.window.width : x; return x; },
+	y: function (y) { y = y || 0; y = (y > 1) ? y / game.window.height : x; return y; },
+	z: function (z) { z = z || 0; if (z > Object.keys (game.scene).length) { game.scene[z].push ([]); }; return z; }
 };
 
 game.load ();
