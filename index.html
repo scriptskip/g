@@ -28,15 +28,30 @@ var game =
 			sprite.image = sprite.image || new Image ();
 			sprite.redraw = sprite.redraw || true;
 
-			sprite.h = sprite.h || sprite.image.naturalHeight;
-			sprite.w = sprite.w || sprite.image.naturalWidth;
+			sprite.height = sprite.height || sprite.image.naturalHeight;
+			sprite.width = sprite.width || sprite.image.naturalWidth;
 			sprite.x = game.x (sprite);
 			sprite.y = game.y (sprite);
 			sprite.z = game.z (sprite);
 
+			sprite.clear = function ()
+			{
+				game.draw.clear (sprite);
+			};
+
 			sprite.draw = function ()
 			{
-				game.draw.image ({ height: sprite.h, image: game.image.test, width: sprite.w, x: sprite.x, y: sprite.y });
+				game.draw.image ({ height: sprite.height, image: game.image.test, width: sprite.width, x: sprite.x, y: sprite.y });
+			};
+
+			sprite.move = function (a, b)
+			{
+				sprite.clear ();
+				sprite.x = a;
+				sprite.y = b;
+				sprite.x = game.x (sprite);
+				sprite.y = game.y (sprite);
+				game.draw.scene = true;
 			};
 
 			game.scene[sprite.z].push (sprite);
@@ -45,6 +60,15 @@ var game =
 
 	draw:
 	{
+		clear: function (o)
+		{
+			var height = o.height;
+			var width = o.width;
+			var x = o.x * game.window.width;
+			var	y = o.y * game.window.height;
+			context.clearRect (x, y, width, height);
+		},
+
 		image: function (image)
 		{
 			console.time ('click');
@@ -135,7 +159,7 @@ var game =
 	{
 		click: function (event)
 		{
-			var tile = 10;
+			var tile = 15;
 			game.create.sprite ({ height: tile, image: game.image.test, width: tile, x: event.clientX, y: event.clientY });
 			game.draw.scene = true;
 		},
@@ -199,7 +223,7 @@ var game =
 	y: function (o)
 	{
 		var y = o.y || 0;
-			y = (y > 1) ? y / game.window.height : x;
+			y = (y > 1) ? y / game.window.height : y;
 		o.redraw = true;
 		return y;
 	},
