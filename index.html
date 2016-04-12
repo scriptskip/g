@@ -26,12 +26,13 @@ var game =
 			sprite.id = game.id++;
 
 			sprite.image = sprite.image || new Image ();
+			sprite.redraw = true;
 
 			sprite.h = sprite.h || sprite.image.naturalHeight;
 			sprite.w = sprite.w || sprite.image.naturalWidth;
-			sprite.x = game.x (sprite.x);
-			sprite.y = game.x (sprite.y);
-			sprite.z = game.z (sprite.z);
+			sprite.x = game.x (sprite);
+			sprite.y = game.y (sprite);
+			sprite.z = game.z (sprite);
 
 			sprite.draw = function ()
 			{
@@ -50,15 +51,13 @@ var game =
 			var h = image.height || this.naturalHeight;
 			var i = image.image;
 			var w = image.width || this.naturalWidth;
-			var x, y;
-			for (var n = 1000; n--;)
-			{
-				x = game.window.width * Math.random ();
-				y = game.window.height * Math.random ();
-				context.drawImage (i, x, y, w, h);
-			};
+			var x = image.x * game.window.width || game.window.width * Math.random ();
+			var	y = image.y * game.window.height || game.window.height * Math.random ();
+			context.drawImage (i, x, y, w, h);;
 			console.timeEnd ('click');
 		},
+
+		resize: false,
 
 		scene: false,
 
@@ -66,12 +65,16 @@ var game =
 		{
 			if (game.draw.scene)
 			{
-				context.clearRect (0, 0, game.window.width, game.window.height);
 				for (var z = 0; z < Object.keys (game.scene).length; z++)
 				{
 					for (var id = game.scene[z].length; id-- ;)
 					{
-						game.scene[z][id].draw ();
+						if (game.draw.resize || game.scene[z][id].redraw)
+						{
+							context.clearRect (game.scene[z][id].x, game.scene[z][id].y, game.scene[z][id].width, game.scene[z][id].height);
+							game.scene[z][id].redraw = false;
+							game.scene[z][id].draw ();
+						};
 					};
 				};
 				game.draw.scene = false;
@@ -106,12 +109,6 @@ var game =
 		game.timer.load ();
 	},
 
-	resize: function ()
-	{
-		window.resize ();
-		canvas.resize ();
-	},
-
 	scene: { 0: [] },
 
 	tick: 50,
@@ -138,7 +135,15 @@ var game =
 		click: function (event)
 		{
 			var tile = 10;
-			game.create.sprite ({ height: tile, image: game.image.test, width: tile, x: 0.5, y: 0.5 });
+			game.create.sprite ({ height: tile, image: game.image.test, width: tile, x: event.clientX, y: event.clientY });
+			game.draw.scene = true;
+		},
+
+		resize: function ()
+		{
+			window.resize ();
+			canvas.resize ();
+			game.draw.resize = true;
 			game.draw.scene = true;
 		},
 
@@ -161,13 +166,13 @@ var game =
 
 			window.onload = function ()
 			{
-				game.resize ();
+				game.update.resize ();
 				this.document.body.appendChild (canvas);
 			};
 
 			window.onresize = function ()
 			{
-				game.resize ();
+				game.update.resize ();
 			};
 
 			window.resize = function ()
@@ -182,9 +187,32 @@ var game =
 		width: undefined
 	},
 
-	x: function (x) { x = x || 0; x = (x > 1) ? x / game.window.width : x; return x; },
-	y: function (y) { y = y || 0; y = (y > 1) ? y / game.window.height : x; return y; },
-	z: function (z) { z = z || 0; if (z > Object.keys (game.scene).length) { game.scene[z].push ([]); }; return z; }
+	x: function (o)
+	{
+		var x = o.x || 0;
+			x = (x > 1) ? x / game.window.width : x;
+		o.redraw = true;
+		return x;
+	},
+
+	y: function (o)
+	{
+		var y = o.y || 0;
+			y = (y > 1) ? y / game.window.height : x;
+		o.redraw = true;
+		return y;
+	},
+
+	z: function (o)
+	{
+		var z = o.z || 0;
+		if (z > Object.keys (game.scene).length)
+		{
+			game.scene[z].push ([]);
+		};
+		o.redraw = true;
+		return z;
+	}
 };
 
 game.load ();
