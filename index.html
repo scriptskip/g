@@ -26,7 +26,7 @@ var game =
 			sprite.id = game.id++;
 
 			sprite.image = sprite.image || new Image ();
-			sprite.redraw = true;
+			sprite.redraw = sprite.redraw || true;
 
 			sprite.h = sprite.h || sprite.image.naturalHeight;
 			sprite.w = sprite.w || sprite.image.naturalWidth;
@@ -71,8 +71,9 @@ var game =
 					{
 						if (game.draw.resize || game.scene[z][id].redraw)
 						{
-							context.clearRect (game.scene[z][id].x, game.scene[z][id].y, game.scene[z][id].width, game.scene[z][id].height);
+							game.draw.resize = false;
 							game.scene[z][id].redraw = false;
+							context.clearRect (game.scene[z][id].x, game.scene[z][id].y, game.scene[z][id].width, game.scene[z][id].height);
 							game.scene[z][id].draw ();
 						};
 					};
