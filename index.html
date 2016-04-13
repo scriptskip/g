@@ -24,6 +24,7 @@ var game =
 		{
 			sprite.type = 'sprite';
 			sprite.id = game.id++;
+			sprite.name = sprite.name || sprite.type + sprite.id;
 
 			sprite.image = sprite.image || new Image ();
 			sprite.redraw = sprite.redraw || true;
@@ -71,14 +72,12 @@ var game =
 
 		image: function (image)
 		{
-			console.time ('click');
 			var h = image.height || this.naturalHeight;
 			var i = image.image;
 			var w = image.width || this.naturalWidth;
 			var x = image.x * game.window.width || game.window.width * Math.random ();
 			var	y = image.y * game.window.height || game.window.height * Math.random ();
 			context.drawImage (i, x, y, w, h);;
-			console.timeEnd ('click');
 		},
 
 		resize: false,
@@ -95,13 +94,13 @@ var game =
 					{
 						if (game.draw.resize || game.scene[z][id].redraw)
 						{
-							game.draw.resize = false;
 							game.scene[z][id].redraw = false;
 							context.clearRect (game.scene[z][id].x, game.scene[z][id].y, game.scene[z][id].width, game.scene[z][id].height);
 							game.scene[z][id].draw ();
 						};
 					};
 				};
+				game.draw.resize = false;
 				game.draw.scene = false;
 			};
 		}
