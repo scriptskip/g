@@ -135,8 +135,6 @@ var game =
 
 	scene: { 0: [] },
 
-	tick: 50,
-	time: 0,
 	timer:
 	{
 		clock: {},
@@ -147,11 +145,13 @@ var game =
 				function ()
 				{
 					game.update.tick ();
-					game.time += game.tick;
+					game.timer.time += game.timer.tick;
 				},
-				game.tick
+				game.timer.tick
 			);
-		}
+		},
+		tick: 50,
+		time: 0
 	},
 
 	update:
