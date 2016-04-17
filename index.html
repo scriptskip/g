@@ -45,6 +45,11 @@ var game =
 				game.draw.image ({ height: sprite.height, image: game.image.test, width: sprite.width, x: sprite.x, y: sprite.y });
 			};
 
+			sprite.fix = function ()
+			{
+				//TODO redraw back sprites
+			};
+
 			sprite.move = function (a, b)
 			{
 				sprite.clear ();
