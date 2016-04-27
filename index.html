@@ -47,17 +47,33 @@ var game =
 
 			sprite.fix = function ()
 			{
-				//TODO redraw back sprites
+				for (var z in game.scene)
+				{
+					var layer = game.scene[z];
+					for (var i = layer.length; i--;)
+					{
+						if (sprite.under (layer[i]))
+						{
+							layer[i].redraw = true;
+						};
+					};
+				};
 			};
 
 			sprite.move = function (a, b)
 			{
 				sprite.clear ();
+				sprite.fix ();
 				sprite.x = a;
 				sprite.y = b;
 				sprite.x = game.x (sprite);
 				sprite.y = game.y (sprite);
 				game.draw.scene = true;
+			};
+
+			sprite.under = function (o)
+			{
+				return ((Math.abs (sprite.x - o.x) <= sprite.width) && (Math.abs (sprite.y - o.y) <= sprite.height));
 			};
 
 			game.scene[sprite.z].push (sprite);
