@@ -76,6 +76,15 @@ var game =
 				return ((Math.abs (sprite.x - o.x) <= sprite.width) && (Math.abs (sprite.y - o.y) <= sprite.height));
 			};
 
+			//TODO clickable sprite
+			sprite.click = (sprite.click) ? game.update.click
+			(
+				function (event)
+				{
+					if (sprite.under ({ x: event.x, y: event.y })) { sprite.click (); };
+				}
+			) : undefined;
+			
 			game.scene[sprite.z].push (sprite);
 		}
 	},
@@ -179,10 +188,26 @@ var game =
 	{
 		click: function (event)
 		{
-			var tile = 15;
-			game.create.sprite ({ height: tile, image: game.image.test, width: tile, x: event.clientX, y: event.clientY });
-			game.draw.scene = true;
+			switch (typeof (event))
+			{
+				case 'function':
+					game.update.event.click.push (event);
+				break;
+
+				default:
+					var tile = 15;
+					game.create.sprite ({ click: function () { log (this); }, height: tile, image: game.image.test, width: tile, x: event.clientX, y: event.clientY });
+
+					for (var i = game.update.event.click.length; i--;)
+					{
+						game.update.event.click[i](event);
+					};
+
+					game.draw.scene = true;
+			};
 		},
+
+		event: { click: [] },
 
 		resize: function ()
 		{
