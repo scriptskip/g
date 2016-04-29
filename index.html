@@ -29,8 +29,8 @@ var game =
 			sprite.image = sprite.image || new Image ();
 			sprite.redraw = sprite.redraw || true;
 
-			sprite.height = sprite.height || sprite.image.naturalHeight;
-			sprite.width = sprite.width || sprite.image.naturalWidth;
+			sprite.height = game.height (sprite);
+			sprite.width = game.width (sprite);
 			sprite.x = game.x (sprite);
 			sprite.y = game.y (sprite);
 			sprite.z = game.z (sprite);
@@ -91,28 +91,32 @@ var game =
 
 	draw:
 	{
-		clear: function (o)
+		clear: function (object)
 		{
-			var height = o.height;
-			var width = o.width;
-			var x = o.x * game.window.width;
-			var	y = o.y * game.window.height;
-			context.clearRect (x, y, width, height);
+			var o = game.draw.size (object);
+			context.clearRect (o.x, o.y, o.width, o.height);
 		},
 
 		image: function (image)
 		{
-			var h = image.height || this.naturalHeight;
 			var i = image.image;
-			var w = image.width || this.naturalWidth;
-			var x = image.x * game.window.width || game.window.width * Math.random ();
-			var	y = image.y * game.window.height || game.window.height * Math.random ();
-			context.drawImage (i, x, y, w, h);;
+			var o = game.draw.size (image);
+			context.drawImage (i, o.x, o.y, o.width, o.height);
 		},
 
 		resize: false,
 
 		scene: false,
+
+		size: function (o)
+		{
+			var size = {};
+				size.height = o.height * game.window.height >> 0 || o.naturalHeight;
+				size.width = o.width * game.window.width >> 0 || o.naturalWidth;
+				size.x = o.x * game.window.width >> 0;
+				size.y = o.y * game.window.height >> 0;
+			return size;
+		},
 
 		update: function ()
 		{
@@ -134,6 +138,14 @@ var game =
 				game.draw.scene = false;
 			};
 		}
+	},
+
+	height: function (o)
+	{
+		var height = o.height || o.image.naturalHeight;
+			height = (height > 1) ? height / game.window.height : height;
+		o.redraw = true;
+		return height;		
 	},
 
 	id: 0,
@@ -221,6 +233,14 @@ var game =
 		{
 			game.draw.update ();
 		}
+	},
+
+	width: function (o)
+	{
+		var width = o.width || o.image.naturalWidth;
+			width = (width > 1) ? width / game.window.width : width;
+		o.redraw = true;
+		return width;
 	},
 
 	window:
