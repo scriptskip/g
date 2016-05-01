@@ -37,9 +37,31 @@ var game =
 			sprite.yx = sprite.yx || undefined;
 			sprite.z = game.z (sprite);
 
+			sprite.click = sprite.click || undefined;
+			sprite.clickable = false;
+
 			sprite.clear = function ()
 			{
 				game.draw.clear (sprite);
+			};
+
+			sprite.clicking = function ()
+			{
+				if (sprite.click)
+				{
+					var f = function (event)
+					{
+						if (sprite.clickable)
+						{
+							if (sprite.under ({ x: game.x ({ x: event.x }), y: game.y ({ y: event.y }) }))
+							{
+								sprite.click ();
+							};
+						}
+						else { sprite.clickable = true; };
+					};
+					game.update.click (f);
+				};
 			};
 
 			sprite.draw = function ()
@@ -62,6 +84,11 @@ var game =
 				};
 			};
 
+			sprite.load = function ()
+			{
+				sprite.clicking ();
+			};
+
 			sprite.move = function (a, b)
 			{
 				sprite.clear ();
@@ -77,16 +104,8 @@ var game =
 			{
 				return ((Math.abs (sprite.x - o.x) <= sprite.width) && (Math.abs (sprite.y - o.y) <= sprite.height));
 			};
-
-			//TODO clickable sprite
-			sprite.click = (sprite.click) ? game.update.click
-			(
-				function (event)
-				{
-					if (sprite.under ({ x: event.x, y: event.y })) { sprite.click (); };
-				}
-			) : undefined;
 			
+			sprite.load ();
 			game.scene[sprite.z].push (sprite);
 		}
 	},
@@ -206,11 +225,12 @@ var game =
 			{
 				case 'function':
 					game.update.event.click.push (event);
+					return event;
 				break;
 
 				default:
 					var tile = 30;
-					game.create.sprite ({ click: function () { log (this); }, height: tile, image: game.image.test, width: tile, x: event.clientX, xy: 1, y: event.clientY });
+					game.create.sprite ({ click: function () { log ('click'); }, height: tile, image: game.image.test, width: tile, x: event.clientX, xy: 1, y: event.clientY });
 
 					for (var i = game.update.event.click.length; i--;)
 					{
