@@ -32,7 +32,9 @@ var game =
 			sprite.height = game.height (sprite);
 			sprite.width = game.width (sprite);
 			sprite.x = game.x (sprite);
+			sprite.xy = sprite.xy || undefined;
 			sprite.y = game.y (sprite);
+			sprite.yx = sprite.yx || undefined;
 			sprite.z = game.z (sprite);
 
 			sprite.clear = function ()
@@ -42,7 +44,7 @@ var game =
 
 			sprite.draw = function ()
 			{
-				game.draw.image ({ height: sprite.height, image: game.image.test, width: sprite.width, x: sprite.x, y: sprite.y });
+				game.draw.image ({ height: sprite.height, image: game.image.test, width: sprite.width, x: sprite.x, xy: sprite.xy, y: sprite.y, yx: sprite.yx });
 			};
 
 			sprite.fix = function ()
@@ -111,8 +113,8 @@ var game =
 		size: function (o)
 		{
 			var size = {};
-				size.height = o.height * game.window.height >> 0 || o.naturalHeight;
-				size.width = o.width * game.window.width >> 0 || o.naturalWidth;
+				size.height = (o.yx) ? o.yx * o.width * game.window.width >> 0 : o.height * game.window.height >> 0;
+				size.width = (o.xy) ? o.xy * o.height * game.window.height  >> 0 : o.width * game.window.width >> 0;
 				size.x = o.x * game.window.width >> 0;
 				size.y = o.y * game.window.height >> 0;
 			return size;
@@ -207,8 +209,8 @@ var game =
 				break;
 
 				default:
-					var tile = 15;
-					game.create.sprite ({ click: function () { log (this); }, height: tile, image: game.image.test, width: tile, x: event.clientX, y: event.clientY });
+					var tile = 30;
+					game.create.sprite ({ click: function () { log (this); }, height: tile, image: game.image.test, width: tile, x: event.clientX, xy: 1, y: event.clientY });
 
 					for (var i = game.update.event.click.length; i--;)
 					{
