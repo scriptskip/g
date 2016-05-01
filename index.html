@@ -223,6 +223,11 @@ var game =
 
 		event: { click: [] },
 
+		mousemove: function (event)
+		{
+			
+		},
+
 		resize: function ()
 		{
 			window.resize ();
@@ -260,6 +265,11 @@ var game =
 			{
 				game.update.resize ();
 				this.document.body.appendChild (canvas);
+			};
+
+			window.onmousemove = function ()
+			{
+				game.update.mousemove (event);
 			};
 
 			window.onresize = function ()
