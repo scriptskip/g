@@ -60,7 +60,7 @@ var game =
 						}
 						else { sprite.clickable = true; };
 					};
-					game.update.click (f);
+					game.update.clicking (sprite.id, f);
 				};
 			};
 
@@ -221,27 +221,24 @@ var game =
 	{
 		click: function (event)
 		{
-			switch (typeof (event))
+			var tile = 0.05;
+			game.create.sprite ({ click: function () { log ('click'); }, height: tile, image: game.image.test, width: tile, x: event.clientX, xy: 1, y: event.clientY });
+
+			for (var id in game.update.event.click)
 			{
-				case 'function':
-					game.update.event.click.push (event);
-					return event;
-				break;
-
-				default:
-					var tile = 30;
-					game.create.sprite ({ click: function () { log ('click'); }, height: tile, image: game.image.test, width: tile, x: event.clientX, xy: 1, y: event.clientY });
-
-					for (var i = game.update.event.click.length; i--;)
-					{
-						game.update.event.click[i](event);
-					};
-
-					game.draw.scene = true;
+				game.update.event.click[id](event);
 			};
+
+			game.draw.scene = true;
 		},
 
-		event: { click: [] },
+		clicking: function (id, f)
+		{
+			game.update.event.click[id] = f;
+			return f;
+		},
+
+		event: { click: {} },
 
 		mousemove: function (event)
 		{
