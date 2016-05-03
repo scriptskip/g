@@ -38,7 +38,9 @@ var game =
 			sprite.z = game.z (sprite);
 
 			sprite.click = sprite.click || undefined;
-			sprite.clickable = false;
+			sprite.click0 = false;
+			sprite.clickable = sprite.clickable || false;
+			sprite.movable = sprite.movable || false;
 
 			sprite.clear = function ()
 			{
@@ -47,18 +49,18 @@ var game =
 
 			sprite.clicking = function ()
 			{
-				if (sprite.click)
+				if (sprite.clickable)
 				{
 					var f = function (event)
 					{
-						if (sprite.clickable)
+						if (sprite.click0)
 						{
 							if (sprite.under ({ x: game.x ({ x: event.x }), y: game.y ({ y: event.y }) }))
 							{
 								sprite.click ();
 							};
 						}
-						else { sprite.clickable = true; };
+						else { sprite.click0 = true; };
 					};
 					game.update.clicking (sprite.id, f);
 				};
@@ -87,6 +89,7 @@ var game =
 			sprite.load = function ()
 			{
 				sprite.clicking ();
+				sprite.moving ();
 			};
 
 			sprite.move = function (a, b)
@@ -98,6 +101,14 @@ var game =
 				sprite.x = game.x (sprite);
 				sprite.y = game.y (sprite);
 				game.draw.scene = true;
+			};
+
+			sprite.moving = function ()
+			{
+				if (sprite.movable)
+				{
+
+				};
 			};
 
 			sprite.under = function (o)
@@ -222,27 +233,34 @@ var game =
 		click: function (event)
 		{
 			var tile = 0.05;
-			game.create.sprite ({ click: function () { log ('click'); }, height: tile, image: game.image.test, width: tile, x: event.clientX, xy: 1, y: event.clientY });
+			game.create.sprite ({ click: function () { log ('click'); }, clickable: true, height: tile, image: game.image.test, movable: true, width: tile, x: event.clientX, xy: 1, y: event.clientY });
 
-			for (var id in game.update.event.click)
-			{
-				game.update.event.click[id](event);
-			};
-
+			game.update.eventer ('click', event);
 			game.draw.scene = true;
 		},
 
 		clicking: function (id, f)
 		{
 			game.update.event.click[id] = f;
-			return f;
 		},
 
-		event: { click: {} },
+		event: { click: {}, move: {} },
+		eventer: function (type, event)
+		{
+			for (var id in game.update.event[type])
+			{
+				game.update.event[type][id] (event);
+			};
+		},
 
 		mousemove: function (event)
 		{
 			
+		},
+
+		moving: function (id, f)
+		{
+			game.update.event.move[id] = f;
 		},
 
 		resize: function ()
