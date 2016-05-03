@@ -66,6 +66,19 @@ var game =
 				};
 			};
 
+			sprite.drag = function (event)
+			{
+				if (sprite.under ({ x: game.x ({ x: event.x }), y: game.y ({ y: event.y }) }))
+				{
+					sprite.move (event.x, event.y);
+				};
+			};
+
+			sprite.drop = function (event)
+			{
+				
+			};
+
 			sprite.draw = function ()
 			{
 				game.draw.image ({ height: sprite.height, image: game.image.test, width: sprite.width, x: sprite.x, xy: sprite.xy, y: sprite.y, yx: sprite.yx });
@@ -107,7 +120,12 @@ var game =
 			{
 				if (sprite.movable)
 				{
-
+					var f = function (event)
+					{
+						sprite.drag (event);
+						sprite.drop (event);
+					};
+					game.update.moving (sprite.id, f);
 				};
 			};
 
@@ -232,8 +250,9 @@ var game =
 	{
 		click: function (event)
 		{
+			// DEBUG
 			var tile = 0.05;
-			game.create.sprite ({ click: function () { log ('click'); }, clickable: true, height: tile, image: game.image.test, movable: true, width: tile, x: event.clientX, xy: 1, y: event.clientY });
+			game.create.sprite ({ click: function () { log ('click'); }, clickable: true, height: tile, image: game.image.test, movable: false, width: tile, x: event.clientX, xy: 1, y: event.clientY });
 
 			game.update.eventer ('click', event);
 			game.draw.scene = true;
@@ -245,6 +264,7 @@ var game =
 		},
 
 		event: { click: {}, move: {} },
+
 		eventer: function (type, event)
 		{
 			for (var id in game.update.event[type])
@@ -253,9 +273,19 @@ var game =
 			};
 		},
 
+		mousedown: function (event)
+		{
+
+		},
+
 		mousemove: function (event)
 		{
-			
+			game.update.eventer ('move', event);
+		},
+
+		mouseup: function (event)
+		{
+
 		},
 
 		moving: function (id, f)
@@ -302,9 +332,19 @@ var game =
 				this.document.body.appendChild (canvas);
 			};
 
-			window.onmousemove = function ()
+			window.onmousedown = function (event)
+			{
+				game.update.mousedown (event);
+			};
+
+			window.onmousemove = function (event)
 			{
 				game.update.mousemove (event);
+			};
+
+			window.onmouseup = function (event)
+			{
+				game.update.mouseup (event);
 			};
 
 			window.onresize = function ()
