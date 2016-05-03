@@ -40,6 +40,7 @@ var game =
 			sprite.click = sprite.click || undefined;
 			sprite.click0 = false;
 			sprite.clickable = sprite.clickable || false;
+			sprite.dragdrop = 0;
 			sprite.movable = sprite.movable || false;
 
 			sprite.clear = function ()
@@ -66,17 +67,28 @@ var game =
 				};
 			};
 
-			sprite.drag = function (event)
+			sprite.drag =
 			{
-				if (sprite.under ({ x: game.x ({ x: event.x }), y: game.y ({ y: event.y }) }))
+				down: function (event)
 				{
-					sprite.move (event.x, event.y);
-				};
-			};
+					if (sprite.under ({ x: game.x ({ x: event.x }), y: game.y ({ y: event.y }) }))
+					{
+						sprite.dragdrop = 1;
+					};
+				},
 
-			sprite.drop = function (event)
-			{
-				
+				move: function (event)
+				{
+					if (sprite.dragdrop == 1)
+					{
+						sprite.move (event.x, event.y);
+					};
+				},
+
+				up: function (event)
+				{
+					sprite.dragdrop = 0;
+				}
 			};
 
 			sprite.draw = function ()
@@ -113,6 +125,7 @@ var game =
 				sprite.y = b;
 				sprite.x = game.x (sprite);
 				sprite.y = game.y (sprite);
+				sprite.draw ();
 				game.draw.scene = true;
 			};
 
@@ -120,12 +133,10 @@ var game =
 			{
 				if (sprite.movable)
 				{
-					var f = function (event)
-					{
-						sprite.drag (event);
-						sprite.drop (event);
-					};
-					game.update.moving (sprite.id, f);
+					var down = function (event) { sprite.drag.down (event); };
+					var move = function (event) { sprite.drag.move (event); };
+					var up = function (event) { sprite.drag.up (event); };
+					game.update.moving (sprite.id, down, move, up);
 				};
 			};
 
@@ -161,10 +172,10 @@ var game =
 		size: function (o)
 		{
 			var size = {};
-				size.height = (o.yx) ? o.yx * o.width * game.window.width >> 0 : o.height * game.window.height >> 0;
-				size.width = (o.xy) ? o.xy * o.height * game.window.height  >> 0 : o.width * game.window.width >> 0;
-				size.x = o.x * game.window.width >> 0;
-				size.y = o.y * game.window.height >> 0;
+				size.height = (o.yx) ? o.yx * o.width * game.window.width : o.height * game.window.height;
+				size.width = (o.xy) ? o.xy * o.height * game.window.height : o.width * game.window.width;
+				size.x = o.x * game.window.width;
+				size.y = o.y * game.window.height;
 			return size;
 		},
 
@@ -178,8 +189,6 @@ var game =
 					{
 						if (game.draw.resize || game.scene[z][id].redraw)
 						{
-							game.scene[z][id].redraw = false;
-							context.clearRect (game.scene[z][id].x, game.scene[z][id].y, game.scene[z][id].width, game.scene[z][id].height);
 							game.scene[z][id].draw ();
 						};
 					};
@@ -252,7 +261,7 @@ var game =
 		{
 			// DEBUG
 			var tile = 0.05;
-			game.create.sprite ({ click: function () { log ('click'); }, clickable: true, height: tile, image: game.image.test, movable: false, width: tile, x: event.clientX, xy: 1, y: event.clientY });
+			game.create.sprite ({ click: function () { log ('click'); }, clickable: true, height: tile, image: game.image.test, movable: true, width: tile, x: event.clientX, xy: 1, y: event.clientY });
 
 			game.update.eventer ('click', event);
 			game.draw.scene = true;
@@ -263,7 +272,7 @@ var game =
 			game.update.event.click[id] = f;
 		},
 
-		event: { click: {}, move: {} },
+		event: { click: {}, down: {}, move: {}, up: {} },
 
 		eventer: function (type, event)
 		{
@@ -275,7 +284,7 @@ var game =
 
 		mousedown: function (event)
 		{
-
+			game.update.eventer ('down', event);
 		},
 
 		mousemove: function (event)
@@ -285,12 +294,14 @@ var game =
 
 		mouseup: function (event)
 		{
-
+			game.update.eventer ('up', event);
 		},
 
-		moving: function (id, f)
+		moving: function (id, down, move, up)
 		{
-			game.update.event.move[id] = f;
+			game.update.event.down[id] = down;
+			game.update.event.move[id] = move;
+			game.update.event.up[id] = up;
 		},
 
 		resize: function ()
